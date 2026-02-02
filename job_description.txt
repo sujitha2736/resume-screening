@@ -1,0 +1,13 @@
+We are hiring a Data Analyst with strong skills in:
+- Python
+- SQL
+- Machine Learning
+- Data Analysis
+- Excel
+- Tableau
+
+Responsibilities:
+- Analyze data to find insights
+- Build predictive models using machine learning
+- Prepare reports and dashboards
+- Collaborate with business teams

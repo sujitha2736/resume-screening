@@ -1,15 +1,19 @@
 import streamlit as st
-import re, threading
+import re
 
 from database import Base, engine, SessionLocal
 from models import User, Job, Application
 from auth import hash_pass, verify_pass
 from resume_parser import extract_text
 from matcher import calculate_match
-from email_service import application_received_mail, delayed_email
+from email_service import application_received_mail
+from scheduler import start_scheduler
 
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="AI Resume Screening", layout="wide")
+
+# ---------- START SCHEDULER ----------
+start_scheduler()
 
 # ---------- UI STYLE ----------
 st.markdown("""
@@ -113,7 +117,6 @@ if "user" in st.session_state:
             st.success("Job Posted Successfully!")
 
         st.subheader("Applicants for Your Jobs")
-
         jobs = db.query(Job).filter_by(recruiter_id=user.id).all()
 
         for job in jobs:
@@ -122,7 +125,7 @@ if "user" in st.session_state:
 
             if apps:
                 for a in apps:
-                    st.info(f"Job: {job.title} | Candidate: {a.candidate_email} | Match Score: {a.score}%")
+                    st.info(f"Candidate: {a.candidate_email} | Match Score: {a.score}%")
             else:
                 st.warning("No applicants yet.")
 
@@ -165,14 +168,7 @@ if "user" in st.session_state:
                         ))
                         db.commit()
 
-                        # Professional email
                         application_received_mail(email)
-
-                        threading.Thread(
-                            target=delayed_email,
-                            args=(email, score)
-                        ).start()
-
                         st.success("Applied Successfully!")
                     else:
                         st.error("No email found in resume.")
